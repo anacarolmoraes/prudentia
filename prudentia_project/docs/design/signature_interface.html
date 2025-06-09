@@ -1,0 +1,1537 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>prudentIA - Assinatura Digital com Blockchain</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <style>
+        :root {
+            --color-primary: #FFC145;
+            --color-primary-dark: #CC972E;
+            --color-primary-light: #FFE5A6;
+            --color-secondary: #45A2FF;
+            --color-secondary-dark: #377FCC;
+            --color-bg: #F7F8FA;
+            --color-surface: #FFFFFF;
+            --color-text: #1E2025;
+            --color-text-light: #5A5D65;
+            --color-success: #27C28B;
+            --color-error: #FF6A55;
+            --color-info: #4AC8FF;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
+        
+        body {
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        header {
+            background-color: var(--color-surface);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--color-text);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo span {
+            color: var(--color-primary);
+        }
+        
+        .logo-icon {
+            color: var(--color-primary);
+            font-size: 28px;
+        }
+        
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--color-primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-primary-dark);
+            font-weight: 700;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 40px 0;
+        }
+        
+        .page-title {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .page-title h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .page-title p {
+            color: var(--color-text-light);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .workflow-steps {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        
+        .workflow-steps::before {
+            content: '';
+            position: absolute;
+            top: 30px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: var(--color-primary-light);
+            z-index: 1;
+        }
+        
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+            flex: 1;
+        }
+        
+        .step-number {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--color-primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 24px;
+            color: var(--color-text);
+            margin-bottom: 10px;
+            position: relative;
+        }
+        
+        .step.active .step-number {
+            background-color: var(--color-primary);
+            color: white;
+        }
+        
+        .step.completed .step-number {
+            background-color: var(--color-success);
+            color: white;
+        }
+        
+        .step.completed .step-number::after {
+            content: '\f00c';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            position: absolute;
+        }
+        
+        .step-label {
+            font-weight: 500;
+            color: var(--color-text-light);
+            text-align: center;
+        }
+        
+        .step.active .step-label {
+            color: var(--color-text);
+            font-weight: 700;
+        }
+        
+        .step.completed .step-label {
+            color: var(--color-success);
+        }
+        
+        .card {
+            background-color: var(--color-surface);
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .card-title {
+            font-size: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card-title i {
+            color: var(--color-primary);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: var(--color-primary);
+            outline: none;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: var(--color-primary);
+            color: white;
+            border-radius: 6px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background-color 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .btn:hover {
+            background-color: var(--color-primary-dark);
+        }
+        
+        .btn-secondary {
+            background-color: var(--color-secondary);
+        }
+        
+        .btn-secondary:hover {
+            background-color: var(--color-secondary-dark);
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--color-primary);
+            color: var(--color-primary);
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--color-primary);
+            color: white;
+        }
+        
+        .btn-success {
+            background-color: var(--color-success);
+        }
+        
+        .btn-success:hover {
+            background-color: #1fa077;
+        }
+        
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        
+        .file-upload {
+            position: relative;
+            border: 2px dashed var(--color-primary-light);
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .file-upload:hover {
+            border-color: var(--color-primary);
+        }
+        
+        .file-upload input[type="file"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        .file-upload-icon {
+            font-size: 48px;
+            color: var(--color-primary);
+            margin-bottom: 15px;
+        }
+        
+        .file-upload-text {
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        
+        .file-upload-info {
+            color: var(--color-text-light);
+            font-size: 14px;
+        }
+        
+        .file-preview {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .file-icon {
+            font-size: 24px;
+            color: var(--color-primary);
+        }
+        
+        .file-details h4 {
+            margin-bottom: 5px;
+        }
+        
+        .file-details p {
+            color: var(--color-text-light);
+            font-size: 14px;
+        }
+        
+        .file-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .signatories-list {
+            margin-top: 20px;
+        }
+        
+        .signatory-item {
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .signatory-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .signatory-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--color-primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-primary-dark);
+            font-weight: 700;
+        }
+        
+        .signatory-details h4 {
+            margin-bottom: 5px;
+        }
+        
+        .signatory-details p {
+            color: var(--color-text-light);
+            font-size: 14px;
+        }
+        
+        .signatory-status {
+            font-weight: 500;
+        }
+        
+        .status-pending {
+            color: var(--color-primary);
+        }
+        
+        .status-signed {
+            color: var(--color-success);
+        }
+        
+        .status-rejected {
+            color: var(--color-error);
+        }
+        
+        .add-signatory-form {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .add-signatory-form .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        
+        .pdf-container {
+            height: 800px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        #pdf-viewer {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .pdf-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: var(--color-surface);
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .pdf-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .pdf-page-info {
+            margin: 0 15px;
+        }
+        
+        .signature-container {
+            position: absolute;
+            border: 2px dashed var(--color-primary);
+            background-color: rgba(255, 193, 69, 0.1);
+            cursor: move;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: var(--color-text-light);
+        }
+        
+        .signature-container.signed {
+            border: none;
+            background-color: transparent;
+        }
+        
+        .signature-image {
+            max-width: 100%;
+            max-height: 100%;
+        }
+        
+        .signature-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+        
+        .signature-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background-color: var(--color-surface);
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 30px;
+            position: relative;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--color-text-light);
+        }
+        
+        .modal-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .signature-pad-container {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        #signature-pad {
+            width: 100%;
+            height: 200px;
+            background-color: white;
+        }
+        
+        .signature-actions {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .verification-result {
+            text-align: center;
+            padding: 30px;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+        
+        .verification-success {
+            background-color: rgba(39, 194, 139, 0.1);
+            border: 1px solid var(--color-success);
+        }
+        
+        .verification-error {
+            background-color: rgba(255, 106, 85, 0.1);
+            border: 1px solid var(--color-error);
+        }
+        
+        .verification-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        
+        .verification-success .verification-icon {
+            color: var(--color-success);
+        }
+        
+        .verification-error .verification-icon {
+            color: var(--color-error);
+        }
+        
+        .verification-title {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .verification-message {
+            color: var(--color-text-light);
+            margin-bottom: 20px;
+        }
+        
+        .blockchain-info {
+            background-color: rgba(69, 162, 255, 0.1);
+            border: 1px solid var(--color-secondary);
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        
+        .blockchain-info h4 {
+            color: var(--color-secondary);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .blockchain-info p {
+            margin-bottom: 5px;
+            font-family: monospace;
+            word-break: break-all;
+        }
+        
+        .signatories-info {
+            margin-top: 20px;
+        }
+        
+        .signatories-info h3 {
+            margin-bottom: 15px;
+        }
+        
+        .step-content {
+            display: none;
+        }
+        
+        .step-content.active {
+            display: block;
+        }
+        
+        footer {
+            background-color: var(--color-surface);
+            padding: 20px 0;
+            margin-top: auto;
+            border-top: 1px solid #eee;
+        }
+        
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .footer-logo {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--color-text);
+        }
+        
+        .footer-logo span {
+            color: var(--color-primary);
+        }
+        
+        .footer-links {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .footer-links a {
+            color: var(--color-text-light);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-links a:hover {
+            color: var(--color-primary);
+        }
+        
+        @media (max-width: 768px) {
+            .workflow-steps {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 20px;
+            }
+            
+            .workflow-steps::before {
+                display: none;
+            }
+            
+            .step {
+                flex-direction: row;
+                width: 100%;
+                gap: 15px;
+            }
+            
+            .step-number {
+                margin-bottom: 0;
+            }
+            
+            .add-signatory-form {
+                flex-direction: column;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .action-buttons .btn {
+                width: 100%;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <a href="#" class="logo">
+                    <i class="fas fa-balance-scale logo-icon"></i>
+                    prudent<span>IA</span>
+                </a>
+                <div class="user-menu">
+                    <div class="user-avatar">
+                        JD
+                    </div>
+                    <span>João Dias</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="page-title">
+                <h1>Assinatura Digital com Blockchain</h1>
+                <p>Assine documentos com segurança jurídica utilizando nossa tecnologia blockchain, que garante a autenticidade e imutabilidade das assinaturas.</p>
+            </div>
+
+            <div class="workflow-steps">
+                <div class="step active" id="step1-indicator">
+                    <div class="step-number">1</div>
+                    <div class="step-label">Upload de Documento</div>
+                </div>
+                <div class="step" id="step2-indicator">
+                    <div class="step-number">2</div>
+                    <div class="step-label">Adicionar Signatários</div>
+                </div>
+                <div class="step" id="step3-indicator">
+                    <div class="step-number">3</div>
+                    <div class="step-label">Posicionar Assinaturas</div>
+                </div>
+                <div class="step" id="step4-indicator">
+                    <div class="step-number">4</div>
+                    <div class="step-label">Assinar Documento</div>
+                </div>
+                <div class="step" id="step5-indicator">
+                    <div class="step-number">5</div>
+                    <div class="step-label">Verificação</div>
+                </div>
+            </div>
+
+            <!-- Step 1: Upload Document -->
+            <div class="step-content active" id="step1-content">
+                <div class="card">
+                    <h3 class="card-title"><i class="fas fa-file-upload"></i> Upload de Documento</h3>
+                    <div class="file-upload">
+                        <input type="file" id="document-upload" accept=".pdf" />
+                        <div class="file-upload-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <div class="file-upload-text">
+                            Arraste e solte seu arquivo PDF aqui
+                        </div>
+                        <div class="file-upload-info">
+                            ou clique para selecionar um arquivo (máximo 10MB)
+                        </div>
+                    </div>
+                    <div class="file-preview" id="file-preview" style="display: none;">
+                        <div class="file-info">
+                            <div class="file-icon">
+                                <i class="fas fa-file-pdf"></i>
+                            </div>
+                            <div class="file-details">
+                                <h4 id="file-name">documento.pdf</h4>
+                                <p id="file-size">1.2 MB</p>
+                            </div>
+                        </div>
+                        <div class="file-actions">
+                            <button class="btn btn-outline" id="remove-file">
+                                <i class="fas fa-trash"></i> Remover
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-top: 20px;">
+                        <label for="document-title">Título do Documento</label>
+                        <input type="text" id="document-title" class="form-control" placeholder="Ex: Contrato de Prestação de Serviços" />
+                    </div>
+                    <div class="form-group">
+                        <label for="document-description">Descrição (opcional)</label>
+                        <textarea id="document-description" class="form-control" rows="3" placeholder="Descreva brevemente o conteúdo deste documento..."></textarea>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-outline" disabled>Voltar</button>
+                        <button class="btn" id="next-to-step2">Próximo</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Add Signatories -->
+            <div class="step-content" id="step2-content">
+                <div class="card">
+                    <h3 class="card-title"><i class="fas fa-users"></i> Adicionar Signatários</h3>
+                    <p>Adicione as pessoas que precisam assinar este documento.</p>
+                    
+                    <div class="add-signatory-form">
+                        <div class="form-group">
+                            <label for="signatory-name">Nome</label>
+                            <input type="text" id="signatory-name" class="form-control" placeholder="Nome completo" />
+                        </div>
+                        <div class="form-group">
+                            <label for="signatory-email">Email</label>
+                            <input type="email" id="signatory-email" class="form-control" placeholder="email@exemplo.com" />
+                        </div>
+                        <div class="form-group">
+                            <label for="signatory-role">Cargo/Função</label>
+                            <input type="text" id="signatory-role" class="form-control" placeholder="Ex: Diretor" />
+                        </div>
+                        <button class="btn" id="add-signatory" style="align-self: flex-end;">
+                            <i class="fas fa-plus"></i> Adicionar
+                        </button>
+                    </div>
+                    
+                    <div class="signatories-list" id="signatories-list">
+                        <!-- Signatories will be added here dynamically -->
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn btn-outline" id="back-to-step1">Voltar</button>
+                        <button class="btn" id="next-to-step3">Próximo</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Position Signatures -->
+            <div class="step-content" id="step3-content">
+                <div class="card">
+                    <h3 class="card-title"><i class="fas fa-map-marker-alt"></i> Posicionar Assinaturas</h3>
+                    <p>Defina onde cada signatário deve assinar no documento. Arraste as caixas de assinatura para as posições desejadas.</p>
+                    
+                    <div class="pdf-toolbar">
+                        <div class="pdf-controls">
+                            <button class="btn btn-outline" id="prev-page">
+                                <i class="fas fa-chevron-left"></i> Anterior
+                            </button>
+                            <span class="pdf-page-info">Página <span id="page-num">1</span> de <span id="page-count">1</span></span>
+                            <button class="btn btn-outline" id="next-page">
+                                <i class="fas fa-chevron-right"></i> Próxima
+                            </button>
+                        </div>
+                        <div>
+                            <button class="btn btn-outline" id="zoom-out">
+                                <i class="fas fa-search-minus"></i>
+                            </button>
+                            <button class="btn btn-outline" id="zoom-in">
+                                <i class="fas fa-search-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="pdf-container">
+                        <canvas id="pdf-viewer"></canvas>
+                        <!-- Signature containers will be added here dynamically -->
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn btn-outline" id="back-to-step2">Voltar</button>
+                        <button class="btn" id="next-to-step4">Próximo</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: Sign Document -->
+            <div class="step-content" id="step4-content">
+                <div class="card">
+                    <h3 class="card-title"><i class="fas fa-file-signature"></i> Assinar Documento</h3>
+                    <p>Revise o documento e adicione sua assinatura.</p>
+                    
+                    <div class="pdf-toolbar">
+                        <div class="pdf-controls">
+                            <button class="btn btn-outline" id="prev-page-sign">
+                                <i class="fas fa-chevron-left"></i> Anterior
+                            </button>
+                            <span class="pdf-page-info">Página <span id="page-num-sign">1</span> de <span id="page-count-sign">1</span></span>
+                            <button class="btn btn-outline" id="next-page-sign">
+                                <i class="fas fa-chevron-right"></i> Próxima
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="pdf-container">
+                        <canvas id="pdf-viewer-sign"></canvas>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn btn-outline" id="back-to-step3">Voltar</button>
+                        <button class="btn btn-success" id="sign-document">Assinar Documento</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 5: Verification -->
+            <div class="step-content" id="step5-content">
+                <div class="card">
+                    <h3 class="card-title"><i class="fas fa-shield-alt"></i> Verificação do Documento</h3>
+                    
+                    <div class="verification-result verification-success">
+                        <div class="verification-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <h3 class="verification-title">Documento Verificado com Sucesso</h3>
+                        <p class="verification-message">Este documento foi assinado digitalmente e verificado na blockchain. A integridade e autenticidade estão garantidas.</p>
+                        <button class="btn">
+                            <i class="fas fa-download"></i> Baixar Documento Assinado
+                        </button>
+                    </div>
+                    
+                    <div class="blockchain-info">
+                        <h4><i class="fas fa-link"></i> Informações da Blockchain</h4>
+                        <p><strong>Hash do Documento:</strong> 8a7b9c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f</p>
+                        <p><strong>Transação:</strong> 0x1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b</p>
+                        <p><strong>Bloco:</strong> 12345678</p>
+                        <p><strong>Data/Hora:</strong> 08/06/2025 14:30:22</p>
+                    </div>
+                    
+                    <div class="signatories-info">
+                        <h3>Signatários</h3>
+                        <div class="signatories-list">
+                            <div class="signatory-item">
+                                <div class="signatory-info">
+                                    <div class="signatory-avatar">JD</div>
+                                    <div class="signatory-details">
+                                        <h4>João Dias</h4>
+                                        <p>joao.dias@exemplo.com</p>
+                                    </div>
+                                </div>
+                                <div class="signatory-status status-signed">
+                                    <i class="fas fa-check-circle"></i> Assinado em 08/06/2025
+                                </div>
+                            </div>
+                            <div class="signatory-item">
+                                <div class="signatory-info">
+                                    <div class="signatory-avatar">MS</div>
+                                    <div class="signatory-details">
+                                        <h4>Maria Silva</h4>
+                                        <p>maria.silva@exemplo.com</p>
+                                    </div>
+                                </div>
+                                <div class="signatory-status status-signed">
+                                    <i class="fas fa-check-circle"></i> Assinado em 08/06/2025
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn btn-outline" id="back-to-step4">Voltar</button>
+                        <button class="btn btn-secondary">
+                            <i class="fas fa-share-alt"></i> Compartilhar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Signature Modal -->
+    <div class="signature-modal" id="signature-modal">
+        <div class="modal-content">
+            <span class="modal-close" id="modal-close">&times;</span>
+            <h2 class="modal-title">Adicionar Assinatura</h2>
+            <p>Assine no campo abaixo ou faça upload de uma imagem da sua assinatura.</p>
+            
+            <div class="signature-pad-container">
+                <canvas id="signature-pad"></canvas>
+            </div>
+            
+            <div class="signature-actions">
+                <button class="btn btn-outline" id="clear-signature">
+                    <i class="fas fa-eraser"></i> Limpar
+                </button>
+                <button class="btn" id="save-signature">
+                    <i class="fas fa-save"></i> Salvar Assinatura
+                </button>
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <p>ou</p>
+                <label for="signature-upload" class="btn btn-outline">
+                    <i class="fas fa-upload"></i> Upload de Imagem
+                </label>
+                <input type="file" id="signature-upload" accept="image/*" style="display: none;" />
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    prudent<span>IA</span>
+                </div>
+                <div class="footer-links">
+                    <a href="#">Termos de Uso</a>
+                    <a href="#">Política de Privacidade</a>
+                    <a href="#">Ajuda</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // PDF.js initialization
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+        
+        let pdfDoc = null;
+        let pageNum = 1;
+        let pageRendering = false;
+        let pageNumPending = null;
+        let scale = 1.5;
+        let canvas = document.getElementById('pdf-viewer');
+        let ctx = canvas.getContext('2d');
+        
+        // Document upload handling
+        const documentUpload = document.getElementById('document-upload');
+        const filePreview = document.getElementById('file-preview');
+        const fileName = document.getElementById('file-name');
+        const fileSize = document.getElementById('file-size');
+        const removeFile = document.getElementById('remove-file');
+        
+        documentUpload.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && file.type === 'application/pdf') {
+                fileName.textContent = file.name;
+                fileSize.textContent = formatFileSize(file.size);
+                filePreview.style.display = 'flex';
+                
+                // Load the PDF
+                const fileReader = new FileReader();
+                fileReader.onload = function() {
+                    const typedarray = new Uint8Array(this.result);
+                    loadPDF(typedarray);
+                };
+                fileReader.readAsArrayBuffer(file);
+            }
+        });
+        
+        removeFile.addEventListener('click', function() {
+            documentUpload.value = '';
+            filePreview.style.display = 'none';
+            // Reset PDF viewer
+            if (pdfDoc) {
+                pdfDoc = null;
+                document.getElementById('page-num').textContent = '1';
+                document.getElementById('page-count').textContent = '1';
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+        });
+        
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // PDF rendering functions
+        function loadPDF(data) {
+            pdfjsLib.getDocument({ data: data }).promise.then(function(pdf) {
+                pdfDoc = pdf;
+                document.getElementById('page-count').textContent = pdf.numPages;
+                document.getElementById('page-count-sign').textContent = pdf.numPages;
+                
+                // Initial render
+                renderPage(pageNum);
+            });
+        }
+        
+        function renderPage(num) {
+            pageRendering = true;
+            
+            pdfDoc.getPage(num).then(function(page) {
+                const viewport = page.getViewport({ scale: scale });
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+                
+                const renderContext = {
+                    canvasContext: ctx,
+                    viewport: viewport
+                };
+                
+                const renderTask = page.render(renderContext);
+                
+                renderTask.promise.then(function() {
+                    pageRendering = false;
+                    
+                    if (pageNumPending !== null) {
+                        renderPage(pageNumPending);
+                        pageNumPending = null;
+                    }
+                });
+            });
+            
+            document.getElementById('page-num').textContent = num;
+            document.getElementById('page-num-sign').textContent = num;
+        }
+        
+        function queueRenderPage(num) {
+            if (pageRendering) {
+                pageNumPending = num;
+            } else {
+                renderPage(num);
+            }
+        }
+        
+        function onPrevPage() {
+            if (pageNum <= 1) {
+                return;
+            }
+            pageNum--;
+            queueRenderPage(pageNum);
+        }
+        
+        function onNextPage() {
+            if (pageNum >= pdfDoc.numPages) {
+                return;
+            }
+            pageNum++;
+            queueRenderPage(pageNum);
+        }
+        
+        document.getElementById('prev-page').addEventListener('click', onPrevPage);
+        document.getElementById('next-page').addEventListener('click', onNextPage);
+        document.getElementById('prev-page-sign').addEventListener('click', onPrevPage);
+        document.getElementById('next-page-sign').addEventListener('click', onNextPage);
+        
+        document.getElementById('zoom-in').addEventListener('click', function() {
+            scale += 0.25;
+            renderPage(pageNum);
+        });
+        
+        document.getElementById('zoom-out').addEventListener('click', function() {
+            if (scale <= 0.5) return;
+            scale -= 0.25;
+            renderPage(pageNum);
+        });
+        
+        // Workflow navigation
+        const steps = ['step1', 'step2', 'step3', 'step4', 'step5'];
+        let currentStep = 0;
+        
+        function showStep(stepIndex) {
+            // Hide all steps
+            document.querySelectorAll('.step-content').forEach(step => {
+                step.classList.remove('active');
+            });
+            
+            // Show current step
+            document.getElementById(`${steps[stepIndex]}-content`).classList.add('active');
+            
+            // Update step indicators
+            document.querySelectorAll('.workflow-steps .step').forEach((indicator, index) => {
+                if (index < stepIndex) {
+                    indicator.classList.remove('active');
+                    indicator.classList.add('completed');
+                } else if (index === stepIndex) {
+                    indicator.classList.add('active');
+                    indicator.classList.remove('completed');
+                } else {
+                    indicator.classList.remove('active');
+                    indicator.classList.remove('completed');
+                }
+            });
+            
+            currentStep = stepIndex;
+        }
+        
+        // Navigation event listeners
+        document.getElementById('next-to-step2').addEventListener('click', function() {
+            showStep(1);
+        });
+        
+        document.getElementById('back-to-step1').addEventListener('click', function() {
+            showStep(0);
+        });
+        
+        document.getElementById('next-to-step3').addEventListener('click', function() {
+            showStep(2);
+        });
+        
+        document.getElementById('back-to-step2').addEventListener('click', function() {
+            showStep(1);
+        });
+        
+        document.getElementById('next-to-step4').addEventListener('click', function() {
+            showStep(3);
+        });
+        
+        document.getElementById('back-to-step3').addEventListener('click', function() {
+            showStep(2);
+        });
+        
+        document.getElementById('sign-document').addEventListener('click', function() {
+            showStep(4);
+        });
+        
+        document.getElementById('back-to-step4').addEventListener('click', function() {
+            showStep(3);
+        });
+        
+        // Signatories management
+        const addSignatoryBtn = document.getElementById('add-signatory');
+        const signatoryNameInput = document.getElementById('signatory-name');
+        const signatoryEmailInput = document.getElementById('signatory-email');
+        const signatoryRoleInput = document.getElementById('signatory-role');
+        const signatoriesList = document.getElementById('signatories-list');
+        
+        let signatories = [];
+        
+        addSignatoryBtn.addEventListener('click', function() {
+            const name = signatoryNameInput.value.trim();
+            const email = signatoryEmailInput.value.trim();
+            const role = signatoryRoleInput.value.trim();
+            
+            if (name && email) {
+                const signatory = {
+                    id: Date.now(),
+                    name: name,
+                    email: email,
+                    role: role,
+                    status: 'pending'
+                };
+                
+                signatories.push(signatory);
+                renderSignatories();
+                
+                // Clear inputs
+                signatoryNameInput.value = '';
+                signatoryEmailInput.value = '';
+                signatoryRoleInput.value = '';
+            }
+        });
+        
+        function renderSignatories() {
+            signatoriesList.innerHTML = '';
+            
+            if (signatories.length === 0) {
+                signatoriesList.innerHTML = '<p>Nenhum signatário adicionado.</p>';
+                return;
+            }
+            
+            signatories.forEach(signatory => {
+                const initials = signatory.name.split(' ').map(n => n[0]).join('').toUpperCase();
+                
+                const signatoryItem = document.createElement('div');
+                signatoryItem.className = 'signatory-item';
+                signatoryItem.innerHTML = `
+                    <div class="signatory-info">
+                        <div class="signatory-avatar">${initials}</div>
+                        <div class="signatory-details">
+                            <h4>${signatory.name}</h4>
+                            <p>${signatory.email}${signatory.role ? ' • ' + signatory.role : ''}</p>
+                        </div>
+                    </div>
+                    <div class="signatory-status status-pending">
+                        <i class="fas fa-clock"></i> Pendente
+                    </div>
+                `;
+                
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'btn btn-outline';
+                removeBtn.innerHTML = '<i class="fas fa-trash"></i>';
+                removeBtn.style.marginLeft = '10px';
+                removeBtn.addEventListener('click', function() {
+                    signatories = signatories.filter(s => s.id !== signatory.id);
+                    renderSignatories();
+                });
+                
+                signatoryItem.querySelector('.signatory-status').appendChild(removeBtn);
+                signatoriesList.appendChild(signatoryItem);
+            });
+        }
+        
+        // Signature pad functionality
+        const signatureModal = document.getElementById('signature-modal');
+        const modalClose = document.getElementById('modal-close');
+        const signatureCanvas = document.getElementById('signature-pad');
+        const clearSignatureBtn = document.getElementById('clear-signature');
+        const saveSignatureBtn = document.getElementById('save-signature');
+        const signatureUpload = document.getElementById('signature-upload');
+        
+        let signaturePad = null;
+        
+        document.getElementById('sign-document').addEventListener('click', function() {
+            signatureModal.classList.add('active');
+            
+            if (!signaturePad) {
+                signaturePad = new SignaturePad(signatureCanvas);
+            }
+        });
+        
+        modalClose.addEventListener('click', function() {
+            signatureModal.classList.remove('active');
+        });
+        
+        clearSignatureBtn.addEventListener('click', function() {
+            signaturePad.clear();
+        });
+        
+        saveSignatureBtn.addEventListener('click', function() {
+            if (signaturePad.isEmpty()) {
+                alert('Por favor, adicione sua assinatura antes de salvar.');
+                return;
+            }
+            
+            const signatureDataUrl = signaturePad.toDataURL();
+            // Here you would typically send the signature to the server
+            // For this demo, we'll just close the modal and proceed
+            signatureModal.classList.remove('active');
+            showStep(4); // Move to verification step
+        });
+        
+        signatureUpload.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.getElementById('signature-pad');
+                        const ctx = canvas.getContext('2d');
+                        
+                        // Clear canvas
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        
+                        // Calculate dimensions to maintain aspect ratio
+                        const scale = Math.min(
+                            canvas.width / img.width,
+                            canvas.height / img.height
+                        );
+                        
+                        const x = (canvas.width - img.width * scale) / 2;
+                        const y = (canvas.height - img.height * scale) / 2;
+                        
+                        // Draw image
+                        ctx.drawImage(
+                            img,
+                            0, 0, img.width, img.height,
+                            x, y, img.width * scale, img.height * scale
+                        );
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        // Signature positioning
+        function createSignatureContainer(signatory, x, y) {
+            const container = document.createElement('div');
+            container.className = 'signature-container';
+            container.style.width = '200px';
+            container.style.height = '100px';
+            container.style.left = `${x}px`;
+            container.style.top = `${y}px`;
+            
+            const label = document.createElement('div');
+            label.textContent = `Assinatura: ${signatory.name}`;
+            container.appendChild(label);
+            
+            // Make draggable
+            let isDragging = false;
+            let offsetX, offsetY;
+            
+            container.addEventListener('mousedown', function(e) {
+                isDragging = true;
+                offsetX = e.clientX - container.getBoundingClientRect().left;
+                offsetY = e.clientY - container.getBoundingClientRect().top;
+            });
+            
+            document.addEventListener('mousemove', function(e) {
+                if (!isDragging) return;
+                
+                const pdfContainer = document.querySelector('.pdf-container');
+                const containerRect = pdfContainer.getBoundingClientRect();
+                
+                let newX = e.clientX - containerRect.left - offsetX;
+                let newY = e.clientY - containerRect.top - offsetY;
+                
+                // Keep within bounds
+                newX = Math.max(0, Math.min(newX, containerRect.width - container.offsetWidth));
+                newY = Math.max(0, Math.min(newY, containerRect.height - container.offsetHeight));
+                
+                container.style.left = `${newX}px`;
+                container.style.top = `${newY}px`;
+            });
+            
+            document.addEventListener('mouseup', function() {
+                isDragging = false;
+            });
+            
+            return container;
+        }
+        
+        // Add signature containers when moving to step 3
+        document.getElementById('next-to-step3').addEventListener('click', function() {
+            const pdfContainer = document.querySelector('.pdf-container');
+            
+            // Remove existing signature containers
+            document.querySelectorAll('.signature-container').forEach(container => {
+                container.remove();
+            });
+            
+            // Add a signature container for each signatory
+            signatories.forEach((signatory, index) => {
+                const x = 50;
+                const y = 100 + (index * 120);
+                const container = createSignatureContainer(signatory, x, y);
+                pdfContainer.appendChild(container);
+            });
+        });
+        
+        // Initialize with empty signatories list
+        renderSignatories();
+        
+        // Mock SignaturePad class for demo purposes
+        class SignaturePad {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.ctx.lineWidth = 2;
+                this.ctx.strokeStyle = '#000';
+                
+                this._isEmpty = true;
+                this._points = [];
+                
+                this._initEvents();
+            }
+            
+            _initEvents() {
+                this.canvas.addEventListener('mousedown', this._handleMouseDown.bind(this));
+                this.canvas.addEventListener('mousemove', this._handleMouseMove.bind(this));
+                document.addEventListener('mouseup', this._handleMouseUp.bind(this));
+                
+                // Touch events
+                this.canvas.addEventListener('touchstart', this._handleTouchStart.bind(this));
+                this.canvas.addEventListener('touchmove', this._handleTouchMove.bind(this));
+                this.canvas.addEventListener('touchend', this._handleTouchEnd.bind(this));
+            }
+            
+            _handleMouseDown(event) {
+                this._isDrawing = true;
+                this._lastPoint = this._createPoint(event);
+                this._points.push(this._lastPoint);
+            }
+            
+            _handleMouseMove(event) {
+                if (!this._isDrawing) return;
+                
+                const currentPoint = this._createPoint(event);
+                this._points.push(currentPoint);
+                
+                this.ctx.beginPath();
+                this.ctx.moveTo(this._lastPoint.x, this._lastPoint.y);
+                this.ctx.lineTo(currentPoint.x, currentPoint.y);
+                this.ctx.stroke();
+                
+                this._lastPoint = currentPoint;
+                this._isEmpty = false;
+            }
+            
+            _handleMouseUp() {
+                this._isDrawing = false;
+            }
+            
+            _handleTouchStart(event) {
+                event.preventDefault();
+                if (event.touches.length === 1) {
+                    this._handleMouseDown(this._createTouchEvent(event.touches[0]));
+                }
+            }
+            
+            _handleTouchMove(event) {
+                event.preventDefault();
+                if (event.touches.length === 1) {
+                    this._handleMouseMove(this._createTouchEvent(event.touches[0]));
+                }
+            }
+            
+            _handleTouchEnd(event) {
+                event.preventDefault();
+                this._handleMouseUp();
+            }
+            
+            _createPoint(event) {
+                const rect = this.canvas.getBoundingClientRect();
+                return {
+                    x: event.clientX - rect.left,
+                    y: event.clientY - rect.top
+                };
+            }
+            
+            _createTouchEvent(touch) {
+                return {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                };
+            }
+            
+            clear() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                this._isEmpty = true;
+                this._points = [];
+            }
+            
+            isEmpty() {
+                return this._isEmpty;
+            }
+            
+            toDataURL() {
+                return this.canvas.toDataURL();
+            }
+        }
+    </script>
+</body>
+</html>

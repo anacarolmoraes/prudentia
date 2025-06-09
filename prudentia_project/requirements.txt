@@ -1,0 +1,73 @@
+# Projeto prudentIA - Dependências
+
+# Core Framework
+Django>=4.2,<5.0
+djangorestframework>=3.14,<3.15
+django-cors-headers>=4.0,<4.1
+gunicorn>=20.1,<20.2  # Servidor WSGI para produção
+
+# Banco de Dados
+psycopg2-binary>=2.9,<2.10  # Adaptador PostgreSQL
+
+# Cache e Filas de Mensagens
+redis>=4.5,<4.6  # Cliente Redis (para cache e Celery broker/backend)
+celery>=5.3,<5.4  # Para tarefas assíncronas
+flower>=1.2,<1.3  # Ferramenta de monitoramento para Celery (opcional)
+# Para RabbitMQ como broker (alternativa ao Redis para Celery):
+# pika>=1.3,<1.4
+
+# Web Scraping
+httpx>=0.24,<0.25  # Cliente HTTP assíncrono
+selectolax>=0.3,<0.4  # Parser HTML rápido
+beautifulsoup4>=4.12,<4.13 # Parser HTML/XML
+
+# Assinatura Digital e Blockchain
+PyJWT>=2.6,<2.7  # Para tokens JSON Web Tokens
+cryptography>=40.0,<41.0  # Funções criptográficas
+web3>=6.0,<6.1  # Para interagir com Ethereum (se for a escolha de blockchain)
+reportlab>=4.0,<4.1  # Para geração e manipulação de PDF
+PyPDF2>=3.0,<3.1 # Para manipulação de PDF
+
+# Processamento de Documentos e OCR
+pytesseract>=0.3,<0.4  # Wrapper Python para Tesseract OCR
+Pillow>=9.5,<10.0  # Manipulação de imagens (fork do PIL)
+opencv-python-headless>=4.7,<4.8  # OpenCV para processamento de imagem (sem GUI)
+PyMuPDF>=1.22,<1.23  # (fitz) Para manipulação de PDF
+pdfplumber>=0.9,<0.10 # Para extração de texto e tabelas de PDF
+pdf2image>=1.16,<1.17  # Para converter PDF para imagens
+
+# Geração e Manipulação de Documentos
+python-docx>=0.8,<0.9  # Para criar e atualizar arquivos Microsoft Word (.docx)
+docxtpl>=0.16,<0.17  # Para preenchimento de templates DOCX
+# docx2pdf>=0.1,<0.2 # Para converter DOCX para PDF (pode ter dependências de SO)
+
+# Processamento de Linguagem Natural (NLP)
+spacy>=3.5,<3.6
+nltk>=3.8,<3.9
+# Modelo spaCy em português (instalar separadamente):
+# python -m spacy download pt_core_news_lg
+
+# Integrações Google (Drive, Forms)
+google-api-python-client>=2.80,<2.81
+google-auth-httplib2>=0.1,<0.2
+google-auth-oauthlib>=1.0,<1.1
+
+# Notificações e APIs Externas
+requests>=2.30,<2.31 # Cliente HTTP (alternativa síncrona ao httpx)
+
+# Utilitários
+python-dotenv>=1.0,<1.1  # Para carregar variáveis de ambiente de .env
+python-jose>=3.3,<3.4 # Para JWT, se necessário para serviços de assinatura
+
+# SQLAlchemy (se usado por algum módulo específico, como o serviço de assinatura original)
+SQLAlchemy>=2.0,<2.1
+
+# Ferramentas de Desenvolvimento, Teste e Qualidade de Código
+# Adicionar apenas em ambientes de desenvolvimento/teste, ou usar um requirements-dev.txt
+# pytest>=7.3,<7.4
+# pytest-django>=4.5,<4.6
+# coverage>=7.2,<7.3
+# flake8>=6.0,<6.1
+# black>=23.3,<23.4
+# isort>=5.12,<5.13
+# django-debug-toolbar>=4.1,<4.2 # Para debug em desenvolvimento
