@@ -15,69 +15,19 @@ REM Verificar versão do Python
 for /f "tokens=2" %%i in ('python --version') do set PYTHON_VERSION=%%i
 echo [INFO] Versao do Python: %PYTHON_VERSION%
 
-REM Verificar estrutura do projeto
+REM Criar diretório para o projeto se não existir
 if not exist prudentia (
-    echo [AVISO] Diretorio 'prudentia/' nao encontrado. Verificando arquivos de configuracao...
-    
-    REM Verificar se arquivos de configuração estão na raiz
-    if exist settings.py if exist urls.py if exist wsgi.py (
-        echo [AVISO] Arquivos de configuracao encontrados na raiz do projeto.
-        echo [INFO] Criando diretorio prudentia/ e movendo arquivos...
-        
-        REM Criar diretório prudentia e mover arquivos
-        mkdir prudentia
-        type nul > prudentia\__init__.py
-        copy settings.py prudentia\
-        copy urls.py prudentia\
-        copy wsgi.py prudentia\
-        if exist asgi.py copy asgi.py prudentia\
-        if exist celery.py copy celery.py prudentia\
-        
-        REM Adicionar código de inicialização do Celery ao __init__.py
-        echo """                                                                > prudentia\__init__.py
-        echo Inicializacao do pacote prudentia.                               >> prudentia\__init__.py
-        echo Este arquivo importa a aplicacao Celery para garantir que ela seja carregada >> prudentia\__init__.py
-        echo quando o Django iniciar.                                         >> prudentia\__init__.py
-        echo """                                                              >> prudentia\__init__.py
-        echo.                                                                 >> prudentia\__init__.py
-        echo # Importar a aplicacao Celery                                    >> prudentia\__init__.py
-        echo from .celery import app as celery_app                            >> prudentia\__init__.py
-        echo.                                                                 >> prudentia\__init__.py
-        echo # Definir quais simbolos serao exportados quando alguem fizer "from prudentia import *" >> prudentia\__init__.py
-        echo __all__ = ['celery_app']                                         >> prudentia\__init__.py
-        
-        echo [SUCESSO] Arquivos movidos para prudentia/. Estrutura corrigida!
-    ) else (
-        echo [AVISO] Nao foram encontrados arquivos de configuracao na raiz.
-        echo [INFO] Criando estrutura basica do diretorio prudentia/...
-        
-        REM Criar diretório prudentia com arquivos básicos
-        mkdir prudentia
-        type nul > prudentia\__init__.py
-        
-        echo [SUCESSO] Diretorio prudentia/ criado com sucesso!
-    )
+    echo [INFO] Criando diretorio 'prudentia' para o projeto...
+    mkdir prudentia
+    echo [SUCESSO] Diretorio 'prudentia' criado com sucesso!
 )
 
-REM Criar diretórios necessários
+REM Criar diretório para logs, media e static se não existirem
 echo [INFO] Criando diretorios para logs, media e arquivos estaticos...
 if not exist logs mkdir logs
 if not exist media mkdir media
 if not exist static mkdir static
 echo [SUCESSO] Diretorios criados com sucesso!
-
-REM Criar diretórios para migrations de cada app
-echo [INFO] Verificando e criando diretorios de migrations para cada app...
-for /d %%d in (apps\*) do (
-    if exist "%%d" (
-        if not exist "%%d\migrations" (
-            mkdir "%%d\migrations"
-            type nul > "%%d\migrations\__init__.py"
-            echo [INFO] Criado diretorio de migrations para: %%d
-        )
-    )
-)
-echo [SUCESSO] Diretorios de migrations configurados!
 
 REM Criar ambiente virtual
 echo [INFO] Criando ambiente virtual Python...
@@ -116,7 +66,6 @@ if exist requirements.txt (
         echo # Django e componentes principais
         echo Django==4.2.10
         echo djangorestframework==3.14.0
-        echo djangorestframework-simplejwt==5.2.2
         echo django-cors-headers==4.3.1
         echo django-filter==23.5
         echo django-allauth==0.61.0
@@ -129,15 +78,9 @@ if exist requirements.txt (
         echo psycopg2-binary==2.9.9
         echo dj-database-url==2.1.0
         echo.
-        echo # Autenticacao e seguranca
-        echo PyJWT==2.8.0
-        echo cryptography==41.0.7
-        echo python-jose[cryptography]==3.3.0
-        echo.
         echo # Processamento assincrono
         echo celery==5.3.6
         echo redis==5.0.1
-        echo flower==2.0.1
         echo.
         echo # Web scraping e HTTP
         echo httpx==0.26.0
@@ -150,8 +93,6 @@ if exist requirements.txt (
         echo Pillow==10.2.0
         echo opencv-python==4.9.0.80
         echo PyPDF2==3.0.1
-        echo pdfplumber==0.10.3
-        echo docxtpl==0.16.7
         echo.
         echo # Integracao com Google Drive
         echo google-api-python-client==2.114.0
@@ -181,54 +122,86 @@ if exist env.example (
     )
 ) else (
     echo [AVISO] Arquivo env.example nao encontrado. Criando um arquivo .env basico...
-    
-    REM Gerar uma chave secreta aleatória
-    for /f "tokens=*" %%a in ('python -c "import secrets; print(secrets.token_urlsafe(32))"') do set SECRET_KEY=%%a
-    
     (
-        echo # Django Core Settings
+        echo # Django
         echo DEBUG=True
-        echo SECRET_KEY=django-insecure-%SECRET_KEY%
+        echo SECRET_KEY=django-insecure-change-this-in-production-environment
         echo ALLOWED_HOSTS=localhost,127.0.0.1
         echo DJANGO_SETTINGS_MODULE=prudentia.settings
         echo.
-        echo # Database Configuration
-        echo # SQLite (for quick development)
+        echo # Database
         echo DB_ENGINE=django.db.backends.sqlite3
         echo DB_NAME=db.sqlite3
         echo.
-        echo # PostgreSQL (recommended for production - uncomment and configure)
-        echo # DB_ENGINE=django.db.backends.postgresql
-        echo # DB_NAME=prudentia_db
-        echo # DB_USER=postgres
-        echo # DB_PASSWORD=postgres
-        echo # DB_HOST=localhost
-        echo # DB_PORT=5432
-        echo.
-        echo # Redis Configuration
+        echo # Redis (opcional, comente se nao estiver usando)
         echo REDIS_URL=redis://localhost:6379/0
         echo CACHE_URL=redis://localhost:6379/1
         echo.
-        echo # Celery Configuration
+        echo # Celery (opcional, comente se nao estiver usando)
         echo CELERY_BROKER_URL=redis://localhost:6379/0
         echo CELERY_RESULT_BACKEND=redis://localhost:6379/0
-        echo CELERY_TIMEZONE=America/Sao_Paulo
         echo.
-        echo # Email Configuration
-        echo EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
-        echo EMAIL_HOST=smtp.gmail.com
-        echo EMAIL_PORT=587
-        echo EMAIL_USE_TLS=True
-        echo EMAIL_HOST_USER=seu-email@gmail.com
-        echo EMAIL_HOST_PASSWORD=sua-senha-de-app
-        echo.
-        echo # Storage Paths
+        echo # Diretorios
         echo MEDIA_ROOT=media/
         echo STATIC_ROOT=static/
         echo LOG_DIR=logs/
     ) > .env
     echo [SUCESSO] Arquivo .env basico criado!
     echo [INFO] Por favor, edite o arquivo .env com suas configuracoes.
+)
+
+REM Verificar se o diretório prudentia está configurado corretamente
+if not exist prudentia (
+    echo [ERRO] O diretorio 'prudentia' nao foi encontrado ou esta vazio.
+    echo [INFO] Certifique-se de que a estrutura do projeto esta correta.
+) else (
+    REM Verificar se __init__.py existe no diretório prudentia
+    if not exist prudentia\__init__.py (
+        echo [INFO] Criando arquivo __init__.py no diretorio prudentia...
+        type nul > prudentia\__init__.py
+        echo [SUCESSO] Arquivo __init__.py criado com sucesso!
+    )
+    
+    REM Verificar se os arquivos principais do Django estão no diretório correto
+    if exist settings.py (
+        if not exist prudentia\settings.py (
+            echo [INFO] Movendo settings.py para o diretorio prudentia...
+            move settings.py prudentia\
+            echo [SUCESSO] settings.py movido com sucesso!
+        )
+    )
+    
+    if exist urls.py (
+        if not exist prudentia\urls.py (
+            echo [INFO] Movendo urls.py para o diretorio prudentia...
+            move urls.py prudentia\
+            echo [SUCESSO] urls.py movido com sucesso!
+        )
+    )
+    
+    if exist wsgi.py (
+        if not exist prudentia\wsgi.py (
+            echo [INFO] Movendo wsgi.py para o diretorio prudentia...
+            move wsgi.py prudentia\
+            echo [SUCESSO] wsgi.py movido com sucesso!
+        )
+    )
+    
+    if exist asgi.py (
+        if not exist prudentia\asgi.py (
+            echo [INFO] Movendo asgi.py para o diretorio prudentia...
+            move asgi.py prudentia\
+            echo [SUCESSO] asgi.py movido com sucesso!
+        )
+    )
+    
+    if exist celery.py (
+        if not exist prudentia\celery.py (
+            echo [INFO] Movendo celery.py para o diretorio prudentia...
+            move celery.py prudentia\
+            echo [SUCESSO] celery.py movido com sucesso!
+        )
+    )
 )
 
 REM Instalar dependências do sistema operacional

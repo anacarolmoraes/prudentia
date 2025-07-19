@@ -38,52 +38,6 @@ if [[ $(echo "$PYTHON_VERSION < 3.10" | bc) -eq 1 ]]; then
     exit 1
 fi
 
-# Verificar estrutura do projeto
-if [ ! -d "prudentia" ]; then
-    echo -e "${YELLOW}Diretório 'prudentia/' não encontrado. Verificando arquivos de configuração...${NC}"
-    
-    # Verificar se arquivos de configuração estão na raiz
-    if [ -f "settings.py" ] && [ -f "urls.py" ] && [ -f "wsgi.py" ]; then
-        echo -e "${YELLOW}Arquivos de configuração encontrados na raiz do projeto.${NC}"
-        echo -e "${BLUE}Criando diretório prudentia/ e movendo arquivos...${NC}"
-        
-        # Criar diretório prudentia e mover arquivos
-        mkdir -p prudentia
-        touch prudentia/__init__.py
-        cp settings.py prudentia/
-        cp urls.py prudentia/
-        cp wsgi.py prudentia/
-        [ -f "asgi.py" ] && cp asgi.py prudentia/
-        [ -f "celery.py" ] && cp celery.py prudentia/
-        
-        # Adicionar código de inicialização do Celery ao __init__.py
-        cat > prudentia/__init__.py << EOL
-"""
-Inicialização do pacote prudentia.
-Este arquivo importa a aplicação Celery para garantir que ela seja carregada
-quando o Django iniciar.
-"""
-
-# Importar a aplicação Celery
-from .celery import app as celery_app
-
-# Definir quais símbolos serão exportados quando alguém fizer "from prudentia import *"
-__all__ = ['celery_app']
-EOL
-        
-        echo -e "${GREEN}Arquivos movidos para prudentia/. Estrutura corrigida!${NC}"
-    else
-        echo -e "${YELLOW}Não foram encontrados arquivos de configuração na raiz.${NC}"
-        echo -e "${BLUE}Criando estrutura básica do diretório prudentia/...${NC}"
-        
-        # Criar diretório prudentia com arquivos básicos
-        mkdir -p prudentia
-        touch prudentia/__init__.py
-        
-        echo -e "${GREEN}Diretório prudentia/ criado com sucesso!${NC}"
-    fi
-fi
-
 # Criar diretório para o projeto se não existir
 if [ ! -d "prudentia" ]; then
     echo -e "${YELLOW}Criando diretório 'prudentia' para o projeto...${NC}"
@@ -95,17 +49,6 @@ fi
 echo -e "${YELLOW}Criando diretórios para logs, media e arquivos estáticos...${NC}"
 mkdir -p logs media static
 echo -e "${GREEN}Diretórios criados com sucesso!${NC}"
-
-# Criar diretórios para migrations de cada app
-echo -e "${YELLOW}Verificando e criando diretórios de migrations para cada app...${NC}"
-for app_dir in apps/*/; do
-    if [ -d "$app_dir" ]; then
-        mkdir -p "${app_dir}migrations"
-        touch "${app_dir}migrations/__init__.py"
-        echo -e "${BLUE}Criado diretório de migrations para: ${app_dir}${NC}"
-    fi
-done
-echo -e "${GREEN}Diretórios de migrations configurados!${NC}"
 
 # Criar e ativar ambiente virtual
 echo -e "${YELLOW}Criando ambiente virtual Python...${NC}"
@@ -144,7 +87,6 @@ else
 # Django e componentes principais
 Django==4.2.10
 djangorestframework==3.14.0
-djangorestframework-simplejwt==5.2.2
 django-cors-headers==4.3.1
 django-filter==23.5
 django-allauth==0.61.0
@@ -157,15 +99,9 @@ django-redis==5.4.0
 psycopg2-binary==2.9.9
 dj-database-url==2.1.0
 
-# Autenticação e segurança
-PyJWT==2.8.0
-cryptography==41.0.7
-python-jose[cryptography]==3.3.0
-
 # Processamento assíncrono
 celery==5.3.6
 redis==5.0.1
-flower==2.0.1
 
 # Web scraping e HTTP
 httpx==0.26.0
@@ -178,8 +114,6 @@ pytesseract==0.3.10
 Pillow==10.2.0
 opencv-python==4.9.0.80
 PyPDF2==3.0.1
-pdfplumber==0.10.3
-docxtpl==0.16.7
 
 # Integração com Google Drive
 google-api-python-client==2.114.0
@@ -210,43 +144,25 @@ if [ -f "env.example" ]; then
 else
     echo -e "${YELLOW}Arquivo env.example não encontrado. Criando um arquivo .env básico...${NC}"
     cat > .env << EOL
-# Django Core Settings
+# Django
 DEBUG=True
-SECRET_KEY=django-insecure-$(openssl rand -base64 32)
+SECRET_KEY=django-insecure-change-this-in-production-environment
 ALLOWED_HOSTS=localhost,127.0.0.1
 DJANGO_SETTINGS_MODULE=prudentia.settings
 
-# Database Configuration
-# SQLite (for quick development)
+# Database
 DB_ENGINE=django.db.backends.sqlite3
 DB_NAME=db.sqlite3
 
-# PostgreSQL (recommended for production - uncomment and configure)
-# DB_ENGINE=django.db.backends.postgresql
-# DB_NAME=prudentia_db
-# DB_USER=postgres
-# DB_PASSWORD=postgres
-# DB_HOST=localhost
-# DB_PORT=5432
-
-# Redis Configuration
+# Redis (opcional, comente se não estiver usando)
 REDIS_URL=redis://localhost:6379/0
 CACHE_URL=redis://localhost:6379/1
 
-# Celery Configuration
+# Celery (opcional, comente se não estiver usando)
 CELERY_BROKER_URL=redis://localhost:6379/0
 CELERY_RESULT_BACKEND=redis://localhost:6379/0
-CELERY_TIMEZONE=America/Sao_Paulo
 
-# Email Configuration
-EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
-EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
-EMAIL_USE_TLS=True
-EMAIL_HOST_USER=seu-email@gmail.com
-EMAIL_HOST_PASSWORD=sua-senha-de-app
-
-# Storage Paths
+# Diretórios
 MEDIA_ROOT=media/
 STATIC_ROOT=static/
 LOG_DIR=logs/
@@ -286,6 +202,50 @@ python -c "import django; print(f'Django {django.__version__} instalado com suce
 python -c "import rest_framework; print('Django REST Framework instalado com sucesso!')" || echo -e "${RED}Django REST Framework não está instalado corretamente.${NC}"
 python -c "import celery; print(f'Celery {celery.__version__} instalado com sucesso!')" || echo -e "${YELLOW}Celery não está instalado ou não pode ser importado.${NC}"
 python -c "import PIL; print(f'Pillow {PIL.__version__} instalado com sucesso!')" || echo -e "${YELLOW}Pillow não está instalado ou não pode ser importado.${NC}"
+
+# Verificar se o diretório prudentia está configurado corretamente
+if [ ! -d "prudentia" ]; then
+    echo -e "${RED}O diretório 'prudentia' não foi encontrado ou está vazio.${NC}"
+    echo -e "${YELLOW}Certifique-se de que a estrutura do projeto está correta.${NC}"
+else
+    # Verificar se __init__.py existe no diretório prudentia
+    if [ ! -f "prudentia/__init__.py" ]; then
+        echo -e "${YELLOW}Criando arquivo __init__.py no diretório prudentia...${NC}"
+        touch prudentia/__init__.py
+        echo -e "${GREEN}Arquivo __init__.py criado com sucesso!${NC}"
+    fi
+    
+    # Verificar se os arquivos principais do Django estão no diretório correto
+    if [ -f "settings.py" ] && [ ! -f "prudentia/settings.py" ]; then
+        echo -e "${YELLOW}Movendo settings.py para o diretório prudentia...${NC}"
+        mv settings.py prudentia/
+        echo -e "${GREEN}settings.py movido com sucesso!${NC}"
+    fi
+    
+    if [ -f "urls.py" ] && [ ! -f "prudentia/urls.py" ]; then
+        echo -e "${YELLOW}Movendo urls.py para o diretório prudentia...${NC}"
+        mv urls.py prudentia/
+        echo -e "${GREEN}urls.py movido com sucesso!${NC}"
+    fi
+    
+    if [ -f "wsgi.py" ] && [ ! -f "prudentia/wsgi.py" ]; then
+        echo -e "${YELLOW}Movendo wsgi.py para o diretório prudentia...${NC}"
+        mv wsgi.py prudentia/
+        echo -e "${GREEN}wsgi.py movido com sucesso!${NC}"
+    fi
+    
+    if [ -f "asgi.py" ] && [ ! -f "prudentia/asgi.py" ]; then
+        echo -e "${YELLOW}Movendo asgi.py para o diretório prudentia...${NC}"
+        mv asgi.py prudentia/
+        echo -e "${GREEN}asgi.py movido com sucesso!${NC}"
+    fi
+    
+    if [ -f "celery.py" ] && [ ! -f "prudentia/celery.py" ]; then
+        echo -e "${YELLOW}Movendo celery.py para o diretório prudentia...${NC}"
+        mv celery.py prudentia/
+        echo -e "${GREEN}celery.py movido com sucesso!${NC}"
+    fi
+fi
 
 echo -e "${GREEN}=== Configuração do ambiente concluída! ===${NC}"
 echo -e "${YELLOW}Próximos passos:${NC}"
